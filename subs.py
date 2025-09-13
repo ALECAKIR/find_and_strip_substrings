@@ -1,47 +1,44 @@
-def find_and_strip_substrings_1(xstr,ystr,zstr):
+def find_and_strip_substrings(xstr: str, ystr: str, zstr: str) -> str:
+    """
+    Extract and concatenate all substrings in `xstr` that are enclosed by
+    the markers `ystr` and `zstr`, excluding the markers themselves.
+
+    Behavior:
+    - Scans left-to-right, non-overlapping pairs: after a match, continues
+      searching after the closing marker `zstr`.
+    - Returns the concatenation of the inner contents between each pair.
+    - If no complete pair is found, returns the original `xstr` unchanged.
+    - If `ystr` or `zstr` is empty, returns the original `xstr` (avoids
+      ambiguous or infinite-match scenarios).
+
+    Examples:
+    - find_and_strip_substrings("xyz", "x", "z") -> "y"
+    - find_and_strip_substrings("xyz", "a", "b") -> "xyz"
+    - find_and_strip_substrings("aSTARThelloENDbSTARTworldEND", "START", "END") -> "helloworld"
+    """
+    # Guard against empty markers which would create zero-length matches
+    if not ystr or not zstr:
+        return xstr
+
     results = []
-    for i in range(len(xstr)):
-        if(ystr in xstr[i:i+len(ystr)]):
-            intc = 0
-            fstr = []
-            for a in range(len(xstr)):
-                intc += 1
-                fstr = xstr[i:i+len(ystr) + intc]
-                if(fstr.__contains__(zstr)):
-                    xstr.replace(fstr, "")
-                    fstr = fstr.replace(ystr, "").replace(zstr, "")
-                    if(results.__contains__(fstr) == 0):
-                        results.append(fstr)
-                        break
-    return results
-
-def find_and_strip_substrings_2(xstr, ystr, zstr):
-    result = ""
     i = 0
-    while i < len(xstr):
+    n = len(xstr)
+    ly = len(ystr)
+    lz = len(zstr)
+
+    # Fast path: if either marker not present at all, return original
+    if xstr.find(ystr) == -1 or xstr.find(zstr) == -1:
+        return xstr
+
+    while i < n:
         y_start = xstr.find(ystr, i)
         if y_start == -1:
             break
-        z_start = xstr.find(zstr, y_start + len(ystr))
+        inner_start = y_start + ly
+        z_start = xstr.find(zstr, inner_start)
         if z_start == -1:
             break
-        fstr = xstr[y_start:z_start + len(zstr)]
-        if fstr not in result:
-            result += (fstr)
-        i = z_start + len(zstr)
-    return result.replace(ystr,"").replace(zstr,"")
+        results.append(xstr[inner_start:z_start])
+        i = z_start + lz
 
-def find_and_strip_substrings_3(xstr, ystr, zstr):
-    result = []
-    i = 0
-    while i < len(xstr):
-        y_start = xstr.find(ystr, i)
-        if y_start == -1:
-            break
-        z_start = xstr.find(zstr, y_start + len(ystr))
-        if z_start == -1:
-            break
-        fstr = xstr[y_start:z_start].replace(ystr, "").replace(zstr, "")
-        result.append(fstr)
-        i = z_start + len(zstr)
-    return "".join(result)
+    return "".join(results) if results else xstr
